@@ -2,65 +2,42 @@ import { useForm } from '@tanstack/react-form';
 import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
-import {
-  firstNameSchema,
-  lastNameSchema,
-  passwordSchema,
-} from '@/validation/account.schema';
+import { emailSchema, passwordSchema } from '@/validation/account.schema';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/tanstack/form/input';
 import { createServerFn, useServerFn } from '@tanstack/react-start';
-import { PrismaClient } from '@prisma/client';
-// import prisma from '@/lib/prisma';
+import { hashPassword } from '@/lib/hashing';
+import prisma from '@/lib/prisma';
 
 export const Route = createFileRoute('/auth/register')({
   component: RouteComponent,
 });
 
 interface RegisterForm {
-  firstName: string;
-  lastName: string;
+  email: string;
   password: string;
 }
 
 const defaultUser: RegisterForm = {
-  firstName: 'Sarah',
-  lastName: 'Smith',
+  email: 'my@email.com',
   password: 'Password1!',
 };
 
 const accountSchema = z.object({
-  firstName: firstNameSchema,
-  lastName: lastNameSchema,
+  email: emailSchema,
   password: passwordSchema,
 });
 
 const serverCreateUser = createServerFn({ method: 'POST' })
   .validator(accountSchema)
   .handler(async ({ data }) => {
-    console.log('Hi Server!', data);
-    const prisma = new PrismaClient();
-
-    // const car = await prisma.user.findUnique({
-    //   where: {
-    //     id: 75001,
-    //   },
-    //   include: {
-    //     user: true,
-    //   },
-    // });
-
     const row = await prisma.user.create({
       data: {
-        email: 'my@email.com',
-        first_name: data.firstName,
-        last_name: data.lastName,
-        password: data.password,
+        email: data.email,
+        password: await hashPassword(data.password),
       },
       select: { id: true },
     });
-
-    console.log(row);
 
     return row;
   });
@@ -94,24 +71,13 @@ function RouteComponent() {
         className="rounded-3xl border border-zinc-800 bg-zinc-900/40 backdrop-blur-sm p-6 md:p-8 space-y-8"
       >
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <form.Field name="firstName">
+          <form.Field name="email">
             {(field) => (
               <Input
                 field={field}
-                label="First name"
-                placeholder="Jane"
-                autoComplete="given-name"
-              />
-            )}
-          </form.Field>
-
-          <form.Field name="lastName">
-            {(field) => (
-              <Input
-                field={field}
-                label="Last name"
-                placeholder="Doe"
-                autoComplete="family-name"
+                label="Email address"
+                placeholder="smith@example.com"
+                autoComplete="email"
               />
             )}
           </form.Field>
@@ -132,7 +98,7 @@ function RouteComponent() {
 
         <div className="flex items-center justify-end gap-3">
           <Button variant="default" type="submit">
-            Submit
+            Register
           </Button>
         </div>
       </form>

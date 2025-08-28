@@ -8,6 +8,7 @@ export const env = createEnv({
       .default('development'),
     SERVER_URL: z.string().url().optional(),
     DATABASE_URL: z.string().url().min(1, 'DATABASE_URL is required'),
+    PASSWORD_PEPPER: z.string(),
   },
 
   /**
