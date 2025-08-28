@@ -9,6 +9,9 @@ import {
 } from '@/validation/account.schema';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/tanstack/form/input';
+import { createServerFn, useServerFn } from '@tanstack/react-start';
+import { PrismaClient } from '@prisma/client';
+// import prisma from '@/lib/prisma';
 
 export const Route = createFileRoute('/auth/register')({
   component: RouteComponent,
@@ -32,15 +35,43 @@ const accountSchema = z.object({
   password: passwordSchema,
 });
 
+const serverCreateUser = createServerFn({ method: 'POST' })
+  .validator(accountSchema)
+  .handler(async ({ data }) => {
+    console.log('Hi Server!', data);
+    const prisma = new PrismaClient();
+
+    // const car = await prisma.user.findUnique({
+    //   where: {
+    //     id: 75001,
+    //   },
+    //   include: {
+    //     user: true,
+    //   },
+    // });
+
+    const row = await prisma.user.create({
+      data: {
+        email: 'my@email.com',
+        first_name: data.firstName,
+        last_name: data.lastName,
+        password: data.password,
+      },
+      select: { id: true },
+    });
+
+    console.log(row);
+
+    return row;
+  });
+
 function RouteComponent() {
+  const callCreateUser = useServerFn(serverCreateUser);
+
   const { mutate: createUser } = useMutation({
-    mutationFn: (todo: RegisterForm) =>
-      fetch('/api/demo-tq-todos', {
-        method: 'POST',
-        body: JSON.stringify(todo),
-      }).then((res) => res.json()),
-    onSuccess: function () {
-      console.log('User created!');
+    mutationFn: (data: RegisterForm) => callCreateUser({ data }),
+    onSuccess: function (response) {
+      console.log('mutation succcess', response);
     },
   });
 
@@ -49,10 +80,7 @@ function RouteComponent() {
     validators: {
       onChange: accountSchema,
     },
-    onSubmit: async ({ value }) => {
-      // Do something with form data
-      await createUser(value);
-    },
+    onSubmit: ({ value }) => createUser(value),
   });
 
   return (
