@@ -1,4 +1,4 @@
-import { createServerFileRoute } from '@tanstack/react-start/server'
+import { createServerFileRoute } from '@tanstack/react-start/server';
 
 export const ServerRoute = createServerFileRoute('/api/demo-names').methods({
   GET: () => {
@@ -6,6 +6,6 @@ export const ServerRoute = createServerFileRoute('/api/demo-names').methods({
       headers: {
         'Content-Type': 'application/json',
       },
-    })
+    });
   },
-})
+});

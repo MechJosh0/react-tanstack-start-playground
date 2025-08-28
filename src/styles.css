@@ -136,3 +136,7 @@ code {
     @apply bg-background text-foreground;
   }
 }
+
+[aria-invalid='true'] {
+  @apply ring-2 ring-red-500 ring-offset-2;
+}

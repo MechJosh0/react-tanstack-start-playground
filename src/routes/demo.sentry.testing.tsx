@@ -6,15 +6,15 @@
  * @ai_context: Demonstrates Sentry features through interactive examples with educational context
  */
 
-import * as fs from 'node:fs/promises'
-import { createFileRoute } from '@tanstack/react-router'
-import { createServerFn } from '@tanstack/react-start'
-import * as Sentry from '@sentry/tanstackstart-react'
-import { useState, useEffect, useRef } from 'react'
+import * as fs from 'node:fs/promises';
+import { createFileRoute } from '@tanstack/react-router';
+import { createServerFn } from '@tanstack/react-start';
+import * as Sentry from '@sentry/tanstackstart-react';
+import { useEffect, useRef, useState } from 'react';
 
 export const Route = createFileRoute('/demo/sentry/testing')({
   component: RouteComponent,
-})
+});
 
 // Server function that will error
 const badServerFunc = createServerFn({
@@ -27,15 +27,15 @@ const badServerFunc = createServerFn({
     },
     async () => {
       try {
-        await fs.readFile('./doesnt-exist', 'utf-8')
-        return true
+        await fs.readFile('./doesnt-exist', 'utf-8');
+        return true;
       } catch (error) {
-        Sentry.captureException(error)
-        throw error
+        Sentry.captureException(error);
+        throw error;
       }
     },
-  )
-})
+  );
+});
 
 // Server function that will succeed but be traced
 const goodServerFunc = createServerFn({
@@ -47,50 +47,50 @@ const goodServerFunc = createServerFn({
       op: 'demo.success',
     },
     async () => {
-      await new Promise((resolve) => setTimeout(resolve, 500))
-      return { success: true }
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      return { success: true };
     },
-  )
-})
+  );
+});
 
 function RouteComponent() {
-  const [isLoading, setIsLoading] = useState<Record<string, boolean>>({})
-  const [hasError, setHasError] = useState<Record<string, boolean>>({})
-  const [showTrace, setShowTrace] = useState<Record<string, boolean>>({})
-  const [spanOps, setSpanOps] = useState<Record<string, string>>({})
-  const [demoStep, setDemoStep] = useState(0)
-  const [replayEvents, setReplayEvents] = useState<string[]>([])
-  const [copiedSpan, setCopiedSpan] = useState<string | null>(null)
-  const startTimeRef = useRef<string>('')
+  const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
+  const [hasError, setHasError] = useState<Record<string, boolean>>({});
+  const [showTrace, setShowTrace] = useState<Record<string, boolean>>({});
+  const [spanOps, setSpanOps] = useState<Record<string, string>>({});
+  const [demoStep, setDemoStep] = useState(0);
+  const [replayEvents, setReplayEvents] = useState<Array<string>>([]);
+  const [copiedSpan, setCopiedSpan] = useState<string | null>(null);
+  const startTimeRef = useRef<string>('');
 
   useEffect(() => {
     // Set initial timestamp only once on client
     if (!startTimeRef.current) {
-      startTimeRef.current = new Date().toISOString()
+      startTimeRef.current = new Date().toISOString();
     }
 
     if (demoStep > 0) {
       const secondsElapsed = (
         (new Date().getTime() - new Date(startTimeRef.current).getTime()) /
         1000
-      ).toFixed(1)
+      ).toFixed(1);
       setReplayEvents((prev) => [
         ...prev,
         `Step ${demoStep}: +${secondsElapsed}s`,
-      ])
+      ]);
     }
-  }, [demoStep])
+  }, [demoStep]);
 
   const handleCopy = (operation: string) => {
-    navigator.clipboard.writeText(operation)
-    setCopiedSpan(operation)
-    setTimeout(() => setCopiedSpan(null), 2000)
-  }
+    navigator.clipboard.writeText(operation);
+    setCopiedSpan(operation);
+    setTimeout(() => setCopiedSpan(null), 2000);
+  };
 
   const handleClientError = async () => {
-    setIsLoading((prev) => ({ ...prev, clientError: true }))
-    setHasError((prev) => ({ ...prev, clientError: false }))
-    setShowTrace((prev) => ({ ...prev, clientError: true }))
+    setIsLoading((prev) => ({ ...prev, clientError: true }));
+    setHasError((prev) => ({ ...prev, clientError: false }));
+    setShowTrace((prev) => ({ ...prev, clientError: true }));
 
     try {
       await Sentry.startSpan(
@@ -102,25 +102,28 @@ function RouteComponent() {
           Sentry.setContext('demo', {
             feature: 'client-error-demo',
             triggered_at: new Date().toISOString(),
-          })
+          });
 
           // Simulate a client-side error
-          throw new Error('Client-side error demonstration')
+          throw new Error('Client-side error demonstration');
         },
-      )
+      );
     } catch (error) {
-      setHasError((prev) => ({ ...prev, clientError: true }))
-      setSpanOps((prev) => ({ ...prev, clientError: 'demo.client-error-flow' }))
-      Sentry.captureException(error)
+      setHasError((prev) => ({ ...prev, clientError: true }));
+      setSpanOps((prev) => ({
+        ...prev,
+        clientError: 'demo.client-error-flow',
+      }));
+      Sentry.captureException(error);
     } finally {
-      setIsLoading((prev) => ({ ...prev, clientError: false }))
+      setIsLoading((prev) => ({ ...prev, clientError: false }));
     }
-  }
+  };
 
   const handleServerError = async () => {
-    setIsLoading((prev) => ({ ...prev, serverError: true }))
-    setHasError((prev) => ({ ...prev, serverError: false }))
-    setShowTrace((prev) => ({ ...prev, serverError: true }))
+    setIsLoading((prev) => ({ ...prev, serverError: true }));
+    setHasError((prev) => ({ ...prev, serverError: false }));
+    setShowTrace((prev) => ({ ...prev, serverError: true }));
 
     try {
       await Sentry.startSpan(
@@ -132,23 +135,26 @@ function RouteComponent() {
           Sentry.setContext('demo', {
             feature: 'server-error-demo',
             triggered_at: new Date().toISOString(),
-          })
+          });
 
-          await badServerFunc()
+          await badServerFunc();
         },
-      )
+      );
     } catch (error) {
-      setHasError((prev) => ({ ...prev, serverError: true }))
-      setSpanOps((prev) => ({ ...prev, serverError: 'demo.server-error-flow' }))
-      Sentry.captureException(error)
+      setHasError((prev) => ({ ...prev, serverError: true }));
+      setSpanOps((prev) => ({
+        ...prev,
+        serverError: 'demo.server-error-flow',
+      }));
+      Sentry.captureException(error);
     } finally {
-      setIsLoading((prev) => ({ ...prev, serverError: false }))
+      setIsLoading((prev) => ({ ...prev, serverError: false }));
     }
-  }
+  };
 
   const handleClientTrace = async () => {
-    setIsLoading((prev) => ({ ...prev, client: true }))
-    setShowTrace((prev) => ({ ...prev, client: true }))
+    setIsLoading((prev) => ({ ...prev, client: true }));
+    setShowTrace((prev) => ({ ...prev, client: true }));
 
     await Sentry.startSpan(
       {
@@ -157,17 +163,17 @@ function RouteComponent() {
       },
       async () => {
         // Simulate some client-side work
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       },
-    )
+    );
 
-    setSpanOps((prev) => ({ ...prev, client: 'demo.client' }))
-    setIsLoading((prev) => ({ ...prev, client: false }))
-  }
+    setSpanOps((prev) => ({ ...prev, client: 'demo.client' }));
+    setIsLoading((prev) => ({ ...prev, client: false }));
+  };
 
   const handleServerTrace = async () => {
-    setIsLoading((prev) => ({ ...prev, server: true }))
-    setShowTrace((prev) => ({ ...prev, server: true }))
+    setIsLoading((prev) => ({ ...prev, server: true }));
+    setShowTrace((prev) => ({ ...prev, server: true }));
 
     try {
       await Sentry.startSpan(
@@ -176,14 +182,14 @@ function RouteComponent() {
           op: 'demo.server',
         },
         async () => {
-          await goodServerFunc()
+          await goodServerFunc();
         },
-      )
-      setSpanOps((prev) => ({ ...prev, server: 'demo.server' }))
+      );
+      setSpanOps((prev) => ({ ...prev, server: 'demo.server' }));
     } finally {
-      setIsLoading((prev) => ({ ...prev, server: false }))
+      setIsLoading((prev) => ({ ...prev, server: false }));
     }
-  }
+  };
 
   return (
     <>
@@ -269,8 +275,8 @@ function RouteComponent() {
                     <button
                       type="button"
                       onClick={() => {
-                        setDemoStep((prev) => prev + 1)
-                        handleClientError()
+                        setDemoStep((prev) => prev + 1);
+                        handleClientError();
                       }}
                       className="w-full text-white rounded-md p-4 relative overflow-hidden group"
                       style={{
@@ -340,8 +346,8 @@ function RouteComponent() {
                     <button
                       type="button"
                       onClick={() => {
-                        setDemoStep((prev) => prev + 1)
-                        handleClientTrace()
+                        setDemoStep((prev) => prev + 1);
+                        handleClientTrace();
                       }}
                       className="w-full text-white rounded-md p-4 relative overflow-hidden group"
                       style={{
@@ -419,8 +425,8 @@ function RouteComponent() {
                     <button
                       type="button"
                       onClick={() => {
-                        setDemoStep((prev) => prev + 1)
-                        handleServerError()
+                        setDemoStep((prev) => prev + 1);
+                        handleServerError();
                       }}
                       className="w-full text-white rounded-md p-4 relative overflow-hidden group"
                       style={{
@@ -490,8 +496,8 @@ function RouteComponent() {
                     <button
                       type="button"
                       onClick={() => {
-                        setDemoStep((prev) => prev + 1)
-                        handleServerTrace()
+                        setDemoStep((prev) => prev + 1);
+                        handleServerTrace();
                       }}
                       className="w-full text-white rounded-md p-4 relative overflow-hidden group"
                       style={{
@@ -561,5 +567,5 @@ function RouteComponent() {
         </div>
       </div>
     </>
-  )
+  );
 }
