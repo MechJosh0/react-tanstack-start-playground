@@ -23,13 +23,13 @@ const defaultUser: RegisterForm = {
   password: 'Password1!',
 };
 
-const accountSchema = z.object({
+const createUserSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
 });
 
 const serverCreateUser = createServerFn({ method: 'POST' })
-  .validator(accountSchema)
+  .validator(createUserSchema)
   .handler(async ({ data }) => {
     const row = await prisma.user.create({
       data: {
@@ -42,11 +42,35 @@ const serverCreateUser = createServerFn({ method: 'POST' })
     return row;
   });
 
+const serverValidateEmailIsUnique = createServerFn({ method: 'GET' })
+  .validator(
+    z.object({
+      email: emailSchema,
+    }),
+  )
+  .handler(async ({ data }) => {
+    const user = await prisma.user.findUnique({
+      select: { id: true },
+      where: { email: data.email },
+    });
+
+    return !user;
+  });
+
 function RouteComponent() {
-  const callCreateUser = useServerFn(serverCreateUser);
+  const callServerCreateUser = useServerFn(serverCreateUser);
+  const callServerValidateEmailIsUnique = useServerFn(
+    serverValidateEmailIsUnique,
+  );
+
+  const validateEmailIsUnique = async (email: string) => {
+    const isUnique = await callServerValidateEmailIsUnique({ data: { email } });
+
+    return !isUnique ? 'This email address is already registered' : null;
+  };
 
   const { mutate: createUser } = useMutation({
-    mutationFn: (data: RegisterForm) => callCreateUser({ data }),
+    mutationFn: (data: RegisterForm) => callServerCreateUser({ data }),
     onSuccess: function (response) {
       console.log('mutation succcess', response);
     },
@@ -55,7 +79,7 @@ function RouteComponent() {
   const form = useForm({
     defaultValues: defaultUser,
     validators: {
-      onChange: accountSchema,
+      onChange: createUserSchema,
     },
     onSubmit: ({ value }) => createUser(value),
   });
@@ -71,7 +95,13 @@ function RouteComponent() {
         className="rounded-3xl border border-zinc-800 bg-zinc-900/40 backdrop-blur-sm p-6 md:p-8 space-y-8"
       >
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <form.Field name="email">
+          <form.Field
+            name="email"
+            validators={{
+              onChangeAsyncDebounceMs: 1000,
+              onChangeAsync: ({ value }) => validateEmailIsUnique(value),
+            }}
+          >
             {(field) => (
               <Input
                 field={field}
