@@ -20,7 +20,7 @@ export const userService = {
       throw new Error('Invalid credentials');
     }
 
-    const session = await sessionRepo.create(user.id);
+    const session = await sessionRepo.create(user.id, { token: true });
 
     setHeader('Set-Cookie', `session=${session.token}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${SESSION_DURATION / 1000}`);
 
