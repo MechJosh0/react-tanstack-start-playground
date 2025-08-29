@@ -9,6 +9,7 @@ import { useForm } from '@tanstack/react-form';
 import { userCreateSchema } from '../schema/userCreateSchema';
 import { Input } from '@/components/tanstack/form/input';
 import { Button } from '@/components/ui/button';
+import { useState } from 'react';
 
 export interface RegisterForm {
   email: string;
@@ -21,6 +22,8 @@ export const defaultUser: RegisterForm = {
 };
 
 export default function RegisterForm() {
+  const [formError, setFormError] = useState<string | undefined>(undefined);
+
   const callPostCreateUser = useServerFn(userCreate);
   const callGetValidateEmailIsUnique = useServerFn(userValidateEmailIsUnique);
   const callPostUserLogin = useServerFn(userLogin);
@@ -55,6 +58,13 @@ export default function RegisterForm() {
     onSuccess: function (response) {
       console.log('mutation succcess', response);
     },
+    onError: function (error: unknown) {
+      if (error instanceof Error) {
+        setFormError(error.message);
+      } else {
+        setFormError('Something went wrong. Please try again.');
+      }
+    },
   });
 
   const form = useForm({
@@ -62,7 +72,10 @@ export default function RegisterForm() {
     validators: {
       onChange: userCreateSchema,
     },
-    onSubmit: ({ value }) => createUser(value),
+    onSubmit: ({ value }) => {
+      setFormError(undefined);
+      createUser(value);
+    },
   });
 
   return (
@@ -107,7 +120,7 @@ export default function RegisterForm() {
       </div>
 
       <div className="flex items-center justify-end gap-3">
-        <Button variant="default" type="submit">
+        <Button variant="default" type="submit" errorMessage={formError}>
           Register
         </Button>
       </div>

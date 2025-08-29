@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { ComponentProps } from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { cva } from 'class-variance-authority';
 import type { VariantProps } from 'class-variance-authority';
@@ -41,19 +41,37 @@ function Button({
   variant,
   size,
   asChild = false,
+  errorMessage,
+  errorProps,
   ...props
-}: React.ComponentProps<'button'> &
+}: ComponentProps<'button'> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
+    errorMessage?: string;
+    errorProps?: React.HTMLAttributes<HTMLParagraphElement>;
   }) {
   const Comp = asChild ? Slot : 'button';
 
   return (
-    <Comp
-      data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
-      {...props}
-    />
+    <div className={cn('inline-flex flex-col gap-1', className && undefined)}>
+      <Comp
+        data-slot="button"
+        aria-invalid={errorMessage ? true : props['aria-invalid']}
+        aria-describedby={errorMessage || undefined}
+        className={cn(
+          buttonVariants({ variant, size }),
+          errorMessage && 'ring-red-500 focus-visible:ring-red-500',
+        )}
+        {...props}
+      />
+      <p
+        role="alert"
+        className={cn('text-sm text-red-400 pt-1')}
+        {...errorProps}
+      >
+        {errorMessage}
+      </p>
+    </div>
   );
 }
 
