@@ -1,15 +1,15 @@
 import { useServerFn } from '@tanstack/react-start';
-import { userCreate } from '../api/userCreate.server';
 import { userValidateEmailIsUnique } from '../api/userValidateEmailIsUnique.server';
-import { userLogin } from '../api/userLogin.server';
-import { userGet } from '../api/userGet.server';
-import { userLogout } from '../api/userLogout.server';
+import { userGet } from '../../user/api/userGet.server';
 import { useMutation } from '@tanstack/react-query';
 import { useForm } from '@tanstack/react-form';
 import { userCreateSchema } from '../schema/userCreateSchema';
 import { Input } from '@/components/tanstack/form/input';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
+import { userRegister } from '../api/userRegister.server';
+import { userLogout } from '../api/userLogout.server';
+import { makeAsyncValidator } from '@/lib/utils';
 
 export interface RegisterForm {
   email: string;
@@ -24,24 +24,15 @@ export const defaultUser: RegisterForm = {
 export default function RegisterForm() {
   const [formError, setFormError] = useState<string | undefined>(undefined);
 
-  const callUserCreate = useServerFn(userCreate);
+  const callUserRegister = useServerFn(userRegister);
   const callUserValidateEmailIsUnique = useServerFn(userValidateEmailIsUnique);
-  const callUserLogin = useServerFn(userLogin);
   const callUserGet = useServerFn(userGet);
   const callUserLogout = useServerFn(userLogout);
 
-  const validateEmailIsUnique = async (email: string) => {
-    const isUnique = await callUserValidateEmailIsUnique({ data: { email } });
-
-    return !isUnique ? 'This email address is already registered' : null;
-  };
-
   const { mutate: createUser } = useMutation({
     mutationFn: async (data: RegisterForm) => {
-      await callUserCreate({ data });
-      console.log('User created');
-
-      await callUserLogin({ data });
+      console.log('calling server');
+      await callUserRegister({ data });
       console.log('Logged user in');
 
       const user = await callUserGet();
@@ -59,6 +50,7 @@ export default function RegisterForm() {
       console.log('mutation succcess', response);
     },
     onError: function (error: unknown) {
+      console.log('error', error);
       if (error instanceof Error) {
         setFormError(error.message);
       } else {
@@ -92,7 +84,9 @@ export default function RegisterForm() {
           name="email"
           validators={{
             onChangeAsyncDebounceMs: 1000,
-            onChangeAsync: ({ value }) => validateEmailIsUnique(value),
+            onChangeAsync: makeAsyncValidator((value: string) =>
+              callUserValidateEmailIsUnique({ data: value }),
+            ),
           }}
         >
           {(field) => (

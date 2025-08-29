@@ -7,3 +7,11 @@ export const cn = function (...inputs: Array<ClassValue>) {
 };
 
 export const SESSION_DURATION = 1000 * 60 * 60 * 24 * 7; // 7 days
+
+export function makeAsyncValidator<T>(fn: (value: T) => Promise<unknown>) {
+  return async ({ value }: { value: T }) => {
+    await fn(value);
+
+    return null;
+  };
+}

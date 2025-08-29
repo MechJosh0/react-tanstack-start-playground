@@ -1,16 +1,11 @@
 import { createServerFn } from '@tanstack/react-start';
-import { userRepo } from '@/repositories/user.repository';
-import z from 'zod';
-import { emailSchema } from '@/lib/validation/account.schema';
+import { userValidateEmailSchema } from '../schema/userValidateEmailSchema';
+import { userService } from '@/services/user.service';
 
 export const userValidateEmailIsUnique = createServerFn({ method: 'GET' })
-  .validator(
-    z.object({
-      email: emailSchema,
-    }),
-  )
-  .handler(async ({ data }) => {
-    const user = await userRepo.getByEmail(data.email);
+  .validator(userValidateEmailSchema)
+  .handler(async ({ data: email }) => {
+    await userService.emailIsUnique(email);
 
-    return !user;
+    return true;
   });

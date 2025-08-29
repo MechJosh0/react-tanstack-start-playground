@@ -22,8 +22,8 @@ export const sessionRepo = {
   },
   async getByToken(token: string) {
     return db.session.findUnique({
+      select: { id: true, userId: true },
       where: { token, expiresAt: { gt: new Date() } },
-      include: { user: true },
     });
   },
 };

@@ -8,7 +8,13 @@ export const userRepo = {
         email: email,
         password: await hashPassword(password),
       },
-      select: { id: true },
+      select: { id: true, password: true },
+    });
+  },
+  async getById(id: number) {
+    return db.user.findUnique({
+      select: { id: true, password: true },
+      where: { id },
     });
   },
   async getByEmail(email: string) {

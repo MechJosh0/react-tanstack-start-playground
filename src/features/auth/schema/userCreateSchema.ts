@@ -5,3 +5,5 @@ export const userCreateSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
 });
+
+export type UserCreateInput = z.infer<typeof userCreateSchema>;
