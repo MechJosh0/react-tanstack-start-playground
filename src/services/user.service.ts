@@ -47,7 +47,7 @@ export const userService = {
     return true;
   },
   async profile(userId: number) {
-    const user = await userRepo.getById(userId);
+    const user = await userRepo.getById(userId, { firstName: true, lastName: true, email: true });
 
     return user;
   },

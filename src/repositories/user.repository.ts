@@ -12,9 +12,9 @@ export const userRepo = {
       },
     });
   },
-  async getById(id: number) {
+  async getById(id: number, select?: Prisma.UserSelect) {
     return db.user.findUnique({
-      select: { id: true },
+      select: { id: true, ...select },
       where: { id },
     });
   },

@@ -8,6 +8,7 @@ import type { QueryClient } from '@tanstack/react-query';
 import { Route as IndexRoute } from '@/routes/index';
 import { Route as AuthRegisterRoute } from '@/routes/auth/register';
 import { Route as AuthLoginRoute } from '@/routes/auth/login';
+import { useAuth } from '@/hooks/useAuth';
 
 interface MyRouterContext {
   queryClient: QueryClient;
@@ -40,6 +41,8 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const { user, isLoading } = useAuth();
+
   return (
     <html lang="en">
       <head>
@@ -57,6 +60,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             <Link className="hover:text-red-400 transition-colors" to={AuthLoginRoute.fullPath}>
               Login
             </Link>
+            {isLoading ? <div>Loading</div> : <div>Loaded</div>} - {user ? <div>Welcome, {user.id}</div> : <div>Not logged in</div>}
           </nav>
         </header>
 

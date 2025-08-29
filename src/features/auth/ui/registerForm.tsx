@@ -1,7 +1,8 @@
 import { useServerFn } from '@tanstack/react-start';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from '@tanstack/react-form';
 import { useState } from 'react';
+import { useRouter } from '@tanstack/react-router';
 import { userValidateEmailIsUnique } from '../api/userValidateEmailIsUnique.server';
 import { userGet } from '../../user/api/userGet.server';
 import { userCreateSchema } from '../schema/userCreateSchema';
@@ -22,6 +23,8 @@ export const defaultUser: RegisterForm = {
 };
 
 export default function RegisterForm() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const [formError, setFormError] = useState<string | undefined>(undefined);
 
   const callUserRegister = useServerFn(userRegister);
@@ -46,8 +49,10 @@ export default function RegisterForm() {
 
       return user;
     },
-    onSuccess: function (response) {
-      console.log('mutation succcess', response);
+    onSuccess: function () {
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+
+      router.navigate({ to: '/' });
     },
     onError: function (error: unknown) {
       console.log('error', error);
