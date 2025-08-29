@@ -6,12 +6,15 @@ import { emailSchema, passwordSchema } from '@/validation/account.schema';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/tanstack/form/input';
 import { createServerFn, useServerFn } from '@tanstack/react-start';
-import { hashPassword } from '@/lib/hashing';
+import { hashPassword, verifyPassword } from '@/lib/hashing';
 import prisma from '@/lib/prisma';
+import { setHeader, getCookie } from '@tanstack/react-start/server';
 
 export const Route = createFileRoute('/auth/register')({
   component: RouteComponent,
 });
+
+const SESSION_DURATION = 1000 * 60 * 60 * 24 * 7; // 7 days
 
 interface RegisterForm {
   email: string;
@@ -28,10 +31,15 @@ const createUserSchema = z.object({
   password: passwordSchema,
 });
 
-const serverCreateUser = createServerFn({ method: 'POST' })
+const loginUserSchema = z.object({
+  email: emailSchema,
+  password: passwordSchema,
+});
+
+const postCreateUser = createServerFn({ method: 'POST' })
   .validator(createUserSchema)
   .handler(async ({ data }) => {
-    const row = await prisma.user.create({
+    const user = await prisma.user.create({
       data: {
         email: data.email,
         password: await hashPassword(data.password),
@@ -39,10 +47,10 @@ const serverCreateUser = createServerFn({ method: 'POST' })
       select: { id: true },
     });
 
-    return row;
+    return user;
   });
 
-const serverValidateEmailIsUnique = createServerFn({ method: 'GET' })
+const getValidateEmailIsUnique = createServerFn({ method: 'GET' })
   .validator(
     z.object({
       email: emailSchema,
@@ -57,20 +65,102 @@ const serverValidateEmailIsUnique = createServerFn({ method: 'GET' })
     return !user;
   });
 
-function RouteComponent() {
-  const callServerCreateUser = useServerFn(serverCreateUser);
-  const callServerValidateEmailIsUnique = useServerFn(
-    serverValidateEmailIsUnique,
+const postUserLogin = createServerFn({ method: 'POST' })
+  .validator(loginUserSchema)
+  .handler(async ({ data }) => {
+    const user = await prisma.user.findUnique({
+      select: { id: true, password: true },
+      where: { email: data.email },
+    });
+
+    if (!user || !(await verifyPassword(user.password, data.password))) {
+      throw new Error('Invalid credentials');
+    }
+
+    const session = await prisma.session.create({
+      data: {
+        userId: user.id,
+        expiresAt: new Date(Date.now() + SESSION_DURATION),
+        token: crypto.randomUUID(),
+      },
+    });
+
+    setHeader(
+      'Set-Cookie',
+      `session=${session.token}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${SESSION_DURATION / 1000}`,
+    );
+
+    return true;
+  });
+
+const getUser = createServerFn({ method: 'GET' }).handler(async () => {
+  const sessionToken = getCookie('session');
+
+  if (!sessionToken) return null;
+
+  const session = await prisma.session.findUnique({
+    // select: { user: { id: true}  },
+    where: { token: sessionToken, expiresAt: { gt: new Date() } },
+    include: { user: true },
+  });
+
+  if (!session) return null;
+
+  // TODO Move into middleware
+  // Auto-extend session if close to expiry
+  await prisma.session.update({
+    where: { id: session.id },
+    data: { expiresAt: new Date(Date.now() + SESSION_DURATION) },
+  });
+
+  return { id: session.user.id, email: session.user.email };
+});
+
+const postUserLogout = createServerFn({ method: 'POST' }).handler(async () => {
+  const sessionToken = getCookie('session');
+
+  if (!sessionToken) return null;
+
+  await prisma.session.delete({ where: { token: sessionToken } });
+
+  setHeader(
+    'Set-Cookie',
+    `session=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0`,
   );
 
+  return true;
+});
+
+function RouteComponent() {
+  const callPostCreateUser = useServerFn(postCreateUser);
+  const callGetValidateEmailIsUnique = useServerFn(getValidateEmailIsUnique);
+  const callPostUserLogin = useServerFn(postUserLogin);
+  const callGetUser = useServerFn(getUser);
+  const callPostUserLogout = useServerFn(postUserLogout);
+
   const validateEmailIsUnique = async (email: string) => {
-    const isUnique = await callServerValidateEmailIsUnique({ data: { email } });
+    const isUnique = await callGetValidateEmailIsUnique({ data: { email } });
 
     return !isUnique ? 'This email address is already registered' : null;
   };
 
   const { mutate: createUser } = useMutation({
-    mutationFn: (data: RegisterForm) => callServerCreateUser({ data }),
+    mutationFn: async (data: RegisterForm) => {
+      await callPostCreateUser({ data });
+      console.log('User created');
+
+      await callPostUserLogin({ data });
+      console.log('Logged user in');
+
+      const user = await callGetUser();
+      console.log('Found user', user);
+
+      await callPostUserLogout();
+      console.log('Logged user out');
+
+      const user2 = await callGetUser();
+      console.log('Found user2', user2);
+    },
     onSuccess: function (response) {
       console.log('mutation succcess', response);
     },

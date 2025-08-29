@@ -13,19 +13,19 @@ model User {
   firstName String? @map("first_name")
   lastName  String? @map("last_name")
   password  String 
-  // cars      Car[]
+  sessions  Session[]
   
   @@map("users")
 }
 
-// model Car {
-//   id     Int    @id @default(autoincrement())
-//   make   String
-//   model  String
-//   year   Int
-//   colour String
-//   user_id Int?
-//   user   User?  @relation(fields: [user_id], references: [id])
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    Int      @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @map("created_at") @default(now())
+
+  user      User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-//   @@map("cars")
-// }
+  @@map("sessions")
+}
