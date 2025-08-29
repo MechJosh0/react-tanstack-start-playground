@@ -23,18 +23,11 @@ export function SubscribeButton({ label }: { label: string }) {
   );
 }
 
-function ErrorMessages({
-  errors,
-}: {
-  errors: Array<string | { message: string }>;
-}) {
+function ErrorMessages({ errors }: { errors: Array<string | { message: string }> }) {
   return (
     <>
       {errors.map((error) => (
-        <div
-          key={typeof error === 'string' ? error : error.message}
-          className="text-red-500 mt-1 font-bold"
-        >
+        <div key={typeof error === 'string' ? error : error.message} className="text-red-500 mt-1 font-bold">
           {typeof error === 'string' ? error : error.message}
         </div>
       ))}
@@ -42,13 +35,7 @@ function ErrorMessages({
   );
 }
 
-export function TextField({
-  label,
-  placeholder,
-}: {
-  label: string;
-  placeholder?: string;
-}) {
+export function TextField({ label, placeholder }: { label: string; placeholder?: string }) {
   const field = useFieldContext<string>();
   const errors = useStore(field.store, (state) => state.meta.errors);
 
@@ -57,24 +44,13 @@ export function TextField({
       <Label htmlFor={label} className="mb-2 text-xl font-bold">
         {label}
       </Label>
-      <Input
-        value={field.state.value}
-        placeholder={placeholder}
-        onBlur={field.handleBlur}
-        onChange={(e) => field.handleChange(e.target.value)}
-      />
+      <Input value={field.state.value} placeholder={placeholder} onBlur={field.handleBlur} onChange={(e) => field.handleChange(e.target.value)} />
       {field.state.meta.isTouched && <ErrorMessages errors={errors} />}
     </div>
   );
 }
 
-export function TextArea({
-  label,
-  rows = 3,
-}: {
-  label: string;
-  rows?: number;
-}) {
+export function TextArea({ label, rows = 3 }: { label: string; rows?: number }) {
   const field = useFieldContext<string>();
   const errors = useStore(field.store, (state) => state.meta.errors);
 
@@ -83,37 +59,19 @@ export function TextArea({
       <Label htmlFor={label} className="mb-2 text-xl font-bold">
         {label}
       </Label>
-      <ShadcnTextarea
-        id={label}
-        value={field.state.value}
-        onBlur={field.handleBlur}
-        rows={rows}
-        onChange={(e) => field.handleChange(e.target.value)}
-      />
+      <ShadcnTextarea id={label} value={field.state.value} onBlur={field.handleBlur} rows={rows} onChange={(e) => field.handleChange(e.target.value)} />
       {field.state.meta.isTouched && <ErrorMessages errors={errors} />}
     </div>
   );
 }
 
-export function Select({
-  label,
-  values,
-  placeholder,
-}: {
-  label: string;
-  values: Array<{ label: string; value: string }>;
-  placeholder?: string;
-}) {
+export function Select({ label, values, placeholder }: { label: string; values: Array<{ label: string; value: string }>; placeholder?: string }) {
   const field = useFieldContext<string>();
   const errors = useStore(field.store, (state) => state.meta.errors);
 
   return (
     <div>
-      <ShadcnSelect.Select
-        name={field.name}
-        value={field.state.value}
-        onValueChange={(value) => field.handleChange(value)}
-      >
+      <ShadcnSelect.Select name={field.name} value={field.state.value} onValueChange={(value) => field.handleChange(value)}>
         <ShadcnSelect.SelectTrigger className="w-full">
           <ShadcnSelect.SelectValue placeholder={placeholder} />
         </ShadcnSelect.SelectTrigger>
@@ -142,12 +100,7 @@ export function Slider({ label }: { label: string }) {
       <Label htmlFor={label} className="mb-2 text-xl font-bold">
         {label}
       </Label>
-      <ShadcnSlider
-        id={label}
-        onBlur={field.handleBlur}
-        value={[field.state.value]}
-        onValueChange={(value) => field.handleChange(value[0])}
-      />
+      <ShadcnSlider id={label} onBlur={field.handleBlur} value={[field.state.value]} onValueChange={(value) => field.handleChange(value[0])} />
       {field.state.meta.isTouched && <ErrorMessages errors={errors} />}
     </div>
   );
@@ -160,12 +113,7 @@ export function Switch({ label }: { label: string }) {
   return (
     <div>
       <div className="flex items-center gap-2">
-        <ShadcnSwitch
-          id={label}
-          onBlur={field.handleBlur}
-          checked={field.state.value}
-          onCheckedChange={(checked) => field.handleChange(checked)}
-        />
+        <ShadcnSwitch id={label} onBlur={field.handleBlur} checked={field.state.value} onCheckedChange={(checked) => field.handleChange(checked)} />
         <Label htmlFor={label}>{label}</Label>
       </div>
       {field.state.meta.isTouched && <ErrorMessages errors={errors} />}

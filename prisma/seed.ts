@@ -1,82 +1,51 @@
-import { PrismaClient } from "@prisma/client";
-import { faker } from "@faker-js/faker";
+import { PrismaClient } from '@prisma/client';
+import { faker } from '@faker-js/faker';
 
 // Written by AI because I cba to write seeding
 
 const prisma = new PrismaClient();
 
 // Car data for realistic seeding
-const carMakes: string[] = [
-  "Toyota",
-  "Honda",
-  "Ford",
-  "Chevrolet",
-  "Nissan",
-  "BMW",
-  "Mercedes",
-  "Audi",
-  "Volkswagen",
-  "Hyundai",
-  "Kia",
-  "Mazda",
-  "Subaru",
-  "Lexus",
-  "Acura",
-];
+const carMakes: Array<string> = ['Toyota', 'Honda', 'Ford', 'Chevrolet', 'Nissan', 'BMW', 'Mercedes', 'Audi', 'Volkswagen', 'Hyundai', 'Kia', 'Mazda', 'Subaru', 'Lexus', 'Acura'];
 
-const carModels: { [key: string]: string[] } = {
-  Toyota: ["Camry", "Corolla", "RAV4", "Prius", "Highlander", "Tacoma"],
-  Honda: ["Civic", "Accord", "CR-V", "Pilot", "Odyssey", "Fit"],
-  Ford: ["F-150", "Escape", "Explorer", "Mustang", "Focus", "Edge"],
-  Chevrolet: ["Silverado", "Equinox", "Malibu", "Tahoe", "Cruze", "Camaro"],
-  Nissan: ["Altima", "Sentra", "Rogue", "Pathfinder", "Murano", "370Z"],
-  BMW: ["3 Series", "5 Series", "X3", "X5", "Z4", "i3"],
-  Mercedes: ["C-Class", "E-Class", "GLC", "GLE", "A-Class", "S-Class"],
-  Audi: ["A3", "A4", "Q5", "Q7", "A6", "TT"],
-  Volkswagen: ["Jetta", "Passat", "Tiguan", "Atlas", "Golf", "Beetle"],
-  Hyundai: ["Elantra", "Sonata", "Tucson", "Santa Fe", "Genesis", "Veloster"],
-  Kia: ["Optima", "Forte", "Sorento", "Sportage", "Soul", "Stinger"],
-  Mazda: ["Mazda3", "Mazda6", "CX-5", "CX-9", "MX-5", "CX-3"],
-  Subaru: ["Outback", "Forester", "Impreza", "Legacy", "Crosstrek", "WRX"],
-  Lexus: ["ES", "RX", "NX", "GX", "IS", "LS"],
-  Acura: ["TLX", "RDX", "MDX", "ILX", "NSX", "TLX"],
+const carModels: { [key: string]: Array<string> } = {
+  Toyota: ['Camry', 'Corolla', 'RAV4', 'Prius', 'Highlander', 'Tacoma'],
+  Honda: ['Civic', 'Accord', 'CR-V', 'Pilot', 'Odyssey', 'Fit'],
+  Ford: ['F-150', 'Escape', 'Explorer', 'Mustang', 'Focus', 'Edge'],
+  Chevrolet: ['Silverado', 'Equinox', 'Malibu', 'Tahoe', 'Cruze', 'Camaro'],
+  Nissan: ['Altima', 'Sentra', 'Rogue', 'Pathfinder', 'Murano', '370Z'],
+  BMW: ['3 Series', '5 Series', 'X3', 'X5', 'Z4', 'i3'],
+  Mercedes: ['C-Class', 'E-Class', 'GLC', 'GLE', 'A-Class', 'S-Class'],
+  Audi: ['A3', 'A4', 'Q5', 'Q7', 'A6', 'TT'],
+  Volkswagen: ['Jetta', 'Passat', 'Tiguan', 'Atlas', 'Golf', 'Beetle'],
+  Hyundai: ['Elantra', 'Sonata', 'Tucson', 'Santa Fe', 'Genesis', 'Veloster'],
+  Kia: ['Optima', 'Forte', 'Sorento', 'Sportage', 'Soul', 'Stinger'],
+  Mazda: ['Mazda3', 'Mazda6', 'CX-5', 'CX-9', 'MX-5', 'CX-3'],
+  Subaru: ['Outback', 'Forester', 'Impreza', 'Legacy', 'Crosstrek', 'WRX'],
+  Lexus: ['ES', 'RX', 'NX', 'GX', 'IS', 'LS'],
+  Acura: ['TLX', 'RDX', 'MDX', 'ILX', 'NSX', 'TLX'],
 };
 
-const colors: string[] = [
-  "Red",
-  "Blue",
-  "Black",
-  "White",
-  "Silver",
-  "Gray",
-  "Green",
-  "Yellow",
-  "Orange",
-  "Purple",
-  "Brown",
-  "Gold",
-];
+const colors: Array<string> = ['Red', 'Blue', 'Black', 'White', 'Silver', 'Gray', 'Green', 'Yellow', 'Orange', 'Purple', 'Brown', 'Gold'];
 
 function generateRandomCar() {
   const make = faker.helpers.arrayElement(carMakes);
   const model = faker.helpers.arrayElement(carModels[make]);
-  const year = faker.date
-    .between({ from: "1990-01-01", to: "2024-12-31" })
-    .getFullYear();
+  const year = faker.date.between({ from: '1990-01-01', to: '2024-12-31' }).getFullYear();
   const colour = faker.helpers.arrayElement(colors);
 
   return { make, model, year, colour };
 }
 
 async function main() {
-  console.log("🌱 Starting database seeding...");
+  console.log('🌱 Starting database seeding...');
 
   // Clear existing data
-  console.log("🧹 Clearing existing data...");
+  console.log('🧹 Clearing existing data...');
   await prisma.car.deleteMany({});
   await prisma.user.deleteMany({});
 
-  console.log("👥 Creating 4,000 users...");
+  console.log('👥 Creating 4,000 users...');
 
   // Create users in batches for better performance
   const batchSize = 200;
@@ -99,16 +68,14 @@ async function main() {
       skipDuplicates: true,
     });
 
-    console.log(
-      `   📝 Created batch ${batch + 1}/${userBatches} (${users.length} users)`,
-    );
+    console.log(`   📝 Created batch ${batch + 1}/${userBatches} (${users.length} users)`);
   }
 
   // Get all created users
   const allUsers = await prisma.user.findMany();
   console.log(`✅ Successfully created ${allUsers.length} users`);
 
-  console.log("🚗 Creating 10,000 cars with specific distribution...");
+  console.log('🚗 Creating 10,000 cars with specific distribution...');
 
   // Seeding requirements:
   // - 4,000 users total
@@ -126,9 +93,7 @@ async function main() {
   console.log(`      👥 Users with cars: ${usersWithCars.length}`);
   console.log(`      🚗 Cars to assign: 9,900`);
   console.log(`      🚫 Cars to leave unassigned: 100`);
-  console.log(
-    `      📊 Average cars per user with cars: ${(9900 / usersWithCars.length).toFixed(2)}`,
-  );
+  console.log(`      📊 Average cars per user with cars: ${(9900 / usersWithCars.length).toFixed(2)}`);
 
   // Calculate distribution: 9,900 cars among 3,900 users
   // Average of 2.54 cars per user with cars
@@ -182,9 +147,7 @@ async function main() {
     totalAssignedCars += carsForThisUser;
   }
 
-  console.log(
-    `   📊 Car assignment verification: ${totalAssignedCars} cars assigned`,
-  );
+  console.log(`   📊 Car assignment verification: ${totalAssignedCars} cars assigned`);
 
   // Create all cars
   const carBatchSize = 500;
@@ -195,10 +158,7 @@ async function main() {
 
   for (let batch = 0; batch < carBatches; batch++) {
     const cars = [];
-    const currentBatchSize = Math.min(
-      carBatchSize,
-      10000 - batch * carBatchSize,
-    );
+    const currentBatchSize = Math.min(carBatchSize, 10000 - batch * carBatchSize);
 
     for (let i = 0; i < currentBatchSize; i++) {
       const car = generateRandomCar();
@@ -233,9 +193,7 @@ async function main() {
       data: cars,
     });
 
-    console.log(
-      `   🚙 Created batch ${batch + 1}/${carBatches} (${cars.length} cars)`,
-    );
+    console.log(`   🚙 Created batch ${batch + 1}/${carBatches} (${cars.length} cars)`);
   }
 
   // Get final statistics
@@ -271,13 +229,13 @@ async function main() {
     },
     orderBy: {
       cars: {
-        _count: "desc",
+        _count: 'desc',
       },
     },
     take: 20,
   });
 
-  console.log("\n📊 Final Seeding Statistics:");
+  console.log('\n📊 Final Seeding Statistics:');
   console.log(`   👥 Total Users: ${totalUsers}`);
   console.log(`   🚗 Total Cars: ${totalCars}`);
   console.log(`   🔗 Assigned Cars: ${assignedCars}`);
@@ -285,35 +243,25 @@ async function main() {
   console.log(`   😔 Users without cars: ${usersWithoutAnyCars}`);
   console.log(`   🚗 Users with cars: ${usersWithAnyCars}`);
 
-  console.log("\n🏆 Top 20 Users by Car Count:");
+  console.log('\n🏆 Top 20 Users by Car Count:');
   userCarCounts.forEach((user, index) => {
     console.log(`   ${index + 1}. ${user.full_name}: ${user._count.cars} cars`);
   });
 
   // Verify our requirements
-  console.log("\n✅ Requirement Verification:");
-  console.log(
-    `   ✅ 4,000 users created: ${totalUsers === 4000 ? "PASS" : "FAIL"}`,
-  );
-  console.log(
-    `   ✅ 10,000 cars created: ${totalCars === 10000 ? "PASS" : "FAIL"}`,
-  );
-  console.log(
-    `   ✅ 100 users without cars: ${usersWithoutAnyCars === 100 ? "PASS" : "FAIL"}`,
-  );
-  console.log(
-    `   ✅ 100 unassigned cars: ${unassignedCars === 100 ? "PASS" : "FAIL"}`,
-  );
-  console.log(
-    `   ✅ 3,900 users with cars: ${usersWithAnyCars === 3900 ? "PASS" : "FAIL"}`,
-  );
+  console.log('\n✅ Requirement Verification:');
+  console.log(`   ✅ 4,000 users created: ${totalUsers === 4000 ? 'PASS' : 'FAIL'}`);
+  console.log(`   ✅ 10,000 cars created: ${totalCars === 10000 ? 'PASS' : 'FAIL'}`);
+  console.log(`   ✅ 100 users without cars: ${usersWithoutAnyCars === 100 ? 'PASS' : 'FAIL'}`);
+  console.log(`   ✅ 100 unassigned cars: ${unassignedCars === 100 ? 'PASS' : 'FAIL'}`);
+  console.log(`   ✅ 3,900 users with cars: ${usersWithAnyCars === 3900 ? 'PASS' : 'FAIL'}`);
 
-  console.log("\n🎉 Database seeding completed successfully!");
+  console.log('\n🎉 Database seeding completed successfully!');
 }
 
 main()
   .catch((e) => {
-    console.error("❌ Error during seeding:", e);
+    console.error('❌ Error during seeding:', e);
     process.exit(1);
   })
   .finally(async () => {

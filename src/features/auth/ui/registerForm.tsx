@@ -1,14 +1,14 @@
 import { useServerFn } from '@tanstack/react-start';
-import { userValidateEmailIsUnique } from '../api/userValidateEmailIsUnique.server';
-import { userGet } from '../../user/api/userGet.server';
 import { useMutation } from '@tanstack/react-query';
 import { useForm } from '@tanstack/react-form';
+import { useState } from 'react';
+import { userValidateEmailIsUnique } from '../api/userValidateEmailIsUnique.server';
+import { userGet } from '../../user/api/userGet.server';
 import { userCreateSchema } from '../schema/userCreateSchema';
+import { userRegister } from '../api/userRegister.server';
 import { Input } from '@/components/tanstack/form/input';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
-import { userRegister } from '../api/userRegister.server';
-import { userLogout } from '../api/userLogout.server';
+// import { userLogout } from '../api/userLogout.server';
 import { makeAsyncValidator } from '@/lib/utils';
 
 export interface RegisterForm {
@@ -27,7 +27,7 @@ export default function RegisterForm() {
   const callUserRegister = useServerFn(userRegister);
   const callUserValidateEmailIsUnique = useServerFn(userValidateEmailIsUnique);
   const callUserGet = useServerFn(userGet);
-  const callUserLogout = useServerFn(userLogout);
+  // const callUserLogout = useServerFn(userLogout);
 
   const { mutate: createUser } = useMutation({
     mutationFn: async (data: RegisterForm) => {
@@ -38,11 +38,11 @@ export default function RegisterForm() {
       const user = await callUserGet();
       console.log('Found user', user);
 
-      await callUserLogout();
-      console.log('Logged user out');
+      // await callUserLogout();
+      // console.log('Logged user out');
 
-      const user2 = await callUserGet();
-      console.log('Found user2', user2);
+      // const user2 = await callUserGet();
+      // console.log('Found user2', user2);
 
       return user;
     },
@@ -84,33 +84,13 @@ export default function RegisterForm() {
           name="email"
           validators={{
             onChangeAsyncDebounceMs: 1000,
-            onChangeAsync: makeAsyncValidator((value: string) =>
-              callUserValidateEmailIsUnique({ data: value }),
-            ),
+            onChangeAsync: makeAsyncValidator((value: string) => callUserValidateEmailIsUnique({ data: value })),
           }}
         >
-          {(field) => (
-            <Input
-              field={field}
-              label="Email address"
-              placeholder="smith@example.com"
-              autoComplete="email"
-            />
-          )}
+          {(field) => <Input field={field} label="Email address" placeholder="smith@example.com" autoComplete="email" />}
         </form.Field>
 
-        <form.Field name="password">
-          {(field) => (
-            <Input
-              field={field}
-              label="Password"
-              type="password"
-              placeholder="••••••••"
-              autoComplete="new-password"
-              help="At least 8 characters."
-            />
-          )}
-        </form.Field>
+        <form.Field name="password">{(field) => <Input field={field} label="Password" type="password" placeholder="••••••••" autoComplete="new-password" help="At least 8 characters." />}</form.Field>
       </div>
 
       <div className="flex items-center justify-end gap-3">

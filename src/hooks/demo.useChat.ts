@@ -5,10 +5,7 @@ import type { Collection } from '@tanstack/db';
 import type { Message } from '@/db-collections';
 import { messagesCollection } from '@/db-collections';
 
-function useStreamConnection(
-  url: string,
-  collection: Collection<any, any, any>,
-) {
+function useStreamConnection(url: string, collection: Collection<any, any, any>) {
   const loadedRef = useRef(false);
 
   useEffect(() => {

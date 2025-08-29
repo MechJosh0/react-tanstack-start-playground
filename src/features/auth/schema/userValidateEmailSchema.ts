@@ -1,5 +1,5 @@
+import type z from 'zod';
 import { emailSchema } from '@/lib/validation/account.schema';
-import z from 'zod';
 
 export const userValidateEmailSchema = emailSchema;
 

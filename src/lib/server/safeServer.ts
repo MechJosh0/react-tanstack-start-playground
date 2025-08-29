@@ -1,7 +1,7 @@
 // src/lib/server/safeServer.ts
 import { createServerFn } from '@tanstack/react-start';
-import type { ZodTypeAny, infer as Infer } from 'zod';
 import { logServerError, toSafeMessage } from './errors';
+import type { infer as Infer, ZodTypeAny } from 'zod';
 
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -10,11 +10,7 @@ type HandlerCtx<TInput> = {
   request: Request;
 };
 
-export function makeServerFn<TSchema extends ZodTypeAny, TOut>(opts: {
-  method?: Method;
-  schema: TSchema;
-  handler: (ctx: HandlerCtx<Infer<TSchema>>) => Promise<TOut> | TOut;
-}) {
+export function makeServerFn<TSchema extends ZodTypeAny, TOut>(opts: { method?: Method; schema: TSchema; handler: (ctx: HandlerCtx<Infer<TSchema>>) => Promise<TOut> | TOut }) {
   const { method = 'POST', schema, handler } = opts;
 
   return createServerFn({ method })

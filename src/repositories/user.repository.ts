@@ -1,27 +1,26 @@
+import type { Prisma } from '@prisma/client';
 import { hashPassword } from '@/lib/hashing';
 import db from '@/lib/server/prisma';
 
 export const userRepo = {
-  async create(email: string, password: string) {
+  async create({ email, password, select }: { email: string; password: string; select?: Prisma.UserSelect }) {
     return db.user.create({
+      select: { id: true, ...select },
       data: {
         email: email,
         password: await hashPassword(password),
       },
-      select: { id: true, password: true },
     });
   },
   async getById(id: number) {
     return db.user.findUnique({
-      select: { id: true, password: true },
+      select: { id: true },
       where: { id },
     });
   },
-  async getByEmail(email: string) {
+  getByEmail(email: string, select?: Prisma.UserSelect) {
     return db.user.findUnique({
-      //   select: { id: true },
-      // TODO - Can select be here and outside?
-      select: { id: true, password: true },
+      select: { id: true, ...select },
       where: { email },
     });
   },

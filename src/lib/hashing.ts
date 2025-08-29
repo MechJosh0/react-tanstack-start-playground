@@ -11,9 +11,6 @@ export const hashPassword = async function (password: string): Promise<string> {
   return argon2.hash(password + process.env.PASSWORD_PEPPER, ARGON2_OPTS);
 };
 
-export const verifyPassword = async function (
-  hash: string,
-  password: string,
-): Promise<boolean> {
+export const verifyPassword = async function (hash: string, password: string): Promise<boolean> {
   return argon2.verify(hash, password + process.env.PASSWORD_PEPPER);
 };
