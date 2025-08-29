@@ -24,36 +24,36 @@ export const defaultUser: RegisterForm = {
 export default function RegisterForm() {
   const [formError, setFormError] = useState<string | undefined>(undefined);
 
-  const callPostCreateUser = useServerFn(userCreate);
-  const callGetValidateEmailIsUnique = useServerFn(userValidateEmailIsUnique);
-  const callPostUserLogin = useServerFn(userLogin);
-  const callGetUser = useServerFn(userGet);
-  const callPostUserLogout = useServerFn(userLogout);
+  const callUserCreate = useServerFn(userCreate);
+  const callUserValidateEmailIsUnique = useServerFn(userValidateEmailIsUnique);
+  const callUserLogin = useServerFn(userLogin);
+  const callUserGet = useServerFn(userGet);
+  const callUserLogout = useServerFn(userLogout);
 
   const validateEmailIsUnique = async (email: string) => {
-    const isUnique = await callGetValidateEmailIsUnique({ data: { email } });
+    const isUnique = await callUserValidateEmailIsUnique({ data: { email } });
 
     return !isUnique ? 'This email address is already registered' : null;
   };
 
   const { mutate: createUser } = useMutation({
     mutationFn: async (data: RegisterForm) => {
-      await callPostCreateUser({ data });
+      await callUserCreate({ data });
       console.log('User created');
 
-      await callPostUserLogin({ data });
+      await callUserLogin({ data });
       console.log('Logged user in');
 
-      const user = await callGetUser();
+      const user = await callUserGet();
       console.log('Found user', user);
 
-      await callPostUserLogout();
+      await callUserLogout();
       console.log('Logged user out');
 
-      const user2 = await callGetUser();
+      const user2 = await callUserGet();
       console.log('Found user2', user2);
 
-      return 'asdf';
+      return user;
     },
     onSuccess: function (response) {
       console.log('mutation succcess', response);
