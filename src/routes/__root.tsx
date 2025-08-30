@@ -5,6 +5,7 @@ import TanStackQueryDevtools from '../integrations/tanstack-query/devtools';
 import appCss from '../styles.css?url';
 import type { QueryClient } from '@tanstack/react-query';
 import { Route as IndexRoute } from '@/routes/index';
+import { Route as ProfileRoute } from '@/routes/profile/index';
 import { Route as AuthRegisterRoute } from '@/routes/auth/register';
 import { Route as AuthLoginRoute } from '@/routes/auth/login';
 import { useUsersProfile } from '@/hooks/user/useUsersProfile';
@@ -70,8 +71,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                   <Link className="hover:text-red-400 transition-colors" to={IndexRoute.fullPath}>
                     Home
                   </Link>
-                  <Link className="hover:text-red-400 transition-colors" to={IndexRoute.fullPath}>
-                    Profile -- {user.id}
+                  <Link className="hover:text-red-400 transition-colors" to={ProfileRoute.fullPath}>
+                    Profile
                   </Link>
                   <button className="cursor-pointer hover:text-red-400 transition-colors" onClick={() => logout.mutate()} disabled={logout.isPending}>
                     Logout
