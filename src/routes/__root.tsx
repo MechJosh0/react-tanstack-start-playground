@@ -1,7 +1,6 @@
 import { HeadContent, Link, Scripts, createRootRouteWithContext } from '@tanstack/react-router';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import { TanstackDevtools } from '@tanstack/react-devtools';
-import StoreDevtools from '../lib/demo-store-devtools';
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools';
 import appCss from '../styles.css?url';
 import type { QueryClient } from '@tanstack/react-query';
@@ -41,7 +40,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
-  const { user, isLoading } = useAuth();
+  const { user, isLoadingUser } = useAuth();
 
   return (
     <html lang="en">
@@ -51,16 +50,32 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body className="bg-zinc-900 text-zinc-200 font-sans text-base">
         <header className="sticky top-0 z-50 h-16 bg-zinc-900 border-b border-zinc-800">
           <nav className="flex justify-end items-center h-full px-8 space-x-10">
-            <Link className="hover:text-red-400 transition-colors" to={IndexRoute.fullPath}>
-              Home
-            </Link>
-            <Link className="hover:text-red-400 transition-colors" to={AuthRegisterRoute.fullPath}>
-              Register
-            </Link>
-            <Link className="hover:text-red-400 transition-colors" to={AuthLoginRoute.fullPath}>
-              Login
-            </Link>
-            {isLoading ? <div>Loading</div> : <div>Loaded</div>} - {user ? <div>Welcome, {user.id}</div> : <div>Not logged in</div>}
+            {!isLoadingUser &&
+              (!user ? (
+                <>
+                  <Link className="hover:text-red-400 transition-colors" to={IndexRoute.fullPath}>
+                    Home
+                  </Link>
+                  <Link className="hover:text-red-400 transition-colors" to={AuthRegisterRoute.fullPath}>
+                    Register
+                  </Link>
+                  <Link className="hover:text-red-400 transition-colors" to={AuthLoginRoute.fullPath}>
+                    Login
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link className="hover:text-red-400 transition-colors" to={IndexRoute.fullPath}>
+                    Home
+                  </Link>
+                  <Link className="hover:text-red-400 transition-colors" to={IndexRoute.fullPath}>
+                    Profile
+                  </Link>
+                  <Link className="hover:text-red-400 transition-colors" to={AuthLoginRoute.fullPath}>
+                    Logout
+                  </Link>
+                </>
+              ))}
           </nav>
         </header>
 
@@ -79,7 +94,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
               name: 'Tanstack Router',
               render: <TanStackRouterDevtoolsPanel />,
             },
-            StoreDevtools,
             TanStackQueryDevtools,
           ]}
         />
