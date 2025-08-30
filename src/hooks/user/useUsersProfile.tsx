@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { userGet } from '@/features/user/api/userGet.server';
 
-export function useAuth() {
+export function useUsersProfile() {
   const { data: user, isLoading: isLoadingUser } = useQuery({
     queryKey: ['current-user'],
     queryFn: userGet,

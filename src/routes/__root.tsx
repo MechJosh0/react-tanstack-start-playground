@@ -7,7 +7,8 @@ import type { QueryClient } from '@tanstack/react-query';
 import { Route as IndexRoute } from '@/routes/index';
 import { Route as AuthRegisterRoute } from '@/routes/auth/register';
 import { Route as AuthLoginRoute } from '@/routes/auth/login';
-import { useAuth } from '@/hooks/useAuth';
+import { useUsersProfile } from '@/hooks/user/useUsersProfile';
+import { useLogout } from '@/hooks/auth/useLogout';
 
 interface MyRouterContext {
   queryClient: QueryClient;
@@ -40,7 +41,8 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
-  const { user, isLoadingUser } = useAuth();
+  const { user, isLoadingUser } = useUsersProfile();
+  const logout = useLogout();
 
   return (
     <html lang="en">
@@ -69,11 +71,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                     Home
                   </Link>
                   <Link className="hover:text-red-400 transition-colors" to={IndexRoute.fullPath}>
-                    Profile
+                    Profile -- {user.id}
                   </Link>
-                  <Link className="hover:text-red-400 transition-colors" to={AuthLoginRoute.fullPath}>
+                  <button className="cursor-pointer hover:text-red-400 transition-colors" onClick={() => logout.mutate()} disabled={logout.isPending}>
                     Logout
-                  </Link>
+                  </button>
                 </>
               ))}
           </nav>
