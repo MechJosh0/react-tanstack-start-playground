@@ -3,33 +3,30 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from '@tanstack/react-form';
 import { useState } from 'react';
 import { useRouter } from '@tanstack/react-router';
-import { userValidateEmailIsUnique } from '../api/userValidateEmailIsUnique.server';
 import { userCreateSchema } from '../schema/userCreateSchema';
-import { userRegister } from '../api/userRegister.server';
+import { userLogin } from '../api/userLogin.server';
 import { Input } from '@/components/tanstack/form/input';
 import { Button } from '@/components/ui/button';
-import { makeAsyncValidator } from '@/lib/utils';
 
-export interface RegisterForm {
+export interface LoginForm {
   email: string;
   password: string;
 }
 
-export const defaultUser: RegisterForm = {
+export const defaultUser: LoginForm = {
   email: 'my@email.com',
   password: 'Password1!',
 };
 
-export default function RegisterForm() {
+export default function LoginForm() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [formError, setFormError] = useState<string | undefined>(undefined);
 
-  const callUserRegister = useServerFn(userRegister);
-  const callUserValidateEmailIsUnique = useServerFn(userValidateEmailIsUnique);
+  const callUserLogin = useServerFn(userLogin);
 
   const { mutate: createUser } = useMutation({
-    mutationFn: async (data: RegisterForm) => callUserRegister({ data }),
+    mutationFn: async (data: LoginForm) => callUserLogin({ data }),
     onSuccess: function () {
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
 
@@ -65,22 +62,13 @@ export default function RegisterForm() {
       className="rounded-3xl border border-zinc-800 bg-zinc-900/40 backdrop-blur-sm p-6 md:p-8 space-y-8"
     >
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        <form.Field
-          name="email"
-          validators={{
-            onChangeAsyncDebounceMs: 1000,
-            onChangeAsync: makeAsyncValidator((value: string) => callUserValidateEmailIsUnique({ data: value })),
-          }}
-        >
-          {(field) => <Input field={field} label="Email address" placeholder="smith@example.com" autoComplete="email" />}
-        </form.Field>
-
+        <form.Field name="email">{(field) => <Input field={field} label="Email address" placeholder="smith@example.com" autoComplete="email" />}</form.Field>
         <form.Field name="password">{(field) => <Input field={field} label="Password" type="password" placeholder="••••••••" autoComplete="new-password" help="At least 8 characters." />}</form.Field>
       </div>
 
       <div className="flex items-center justify-end gap-3">
         <Button variant="default" type="submit" errorMessage={formError}>
-          Register
+          Login
         </Button>
       </div>
     </form>

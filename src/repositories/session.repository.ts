@@ -3,7 +3,7 @@ import db from '@/lib/server/prisma';
 import { SESSION_DURATION } from '@/lib/utils';
 
 export const sessionRepo = {
-  async create(userId: number, select?: Prisma.SessionSelect) {
+  async create({ userId, select }: { userId: number; select?: Prisma.SessionSelect }) {
     return db.session.create({
       select: { id: true, ...select },
       data: {
@@ -22,7 +22,7 @@ export const sessionRepo = {
   async delete(token: string) {
     return db.session.delete({ where: { token } });
   },
-  async getByToken(token: string, select?: Prisma.SessionSelect) {
+  async getByToken({ token, select }: { token: string; select?: Prisma.SessionSelect }) {
     return db.session.findUnique({
       select: { id: true, ...select },
       where: { token, expiresAt: { gt: new Date() } },

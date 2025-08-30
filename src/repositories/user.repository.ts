@@ -12,13 +12,13 @@ export const userRepo = {
       },
     });
   },
-  async getById(id: number, select?: Prisma.UserSelect) {
+  async getById({ id, select }: { id: number; select?: Prisma.UserSelect }) {
     return db.user.findUnique({
       select: { id: true, ...select },
       where: { id },
     });
   },
-  getByEmail(email: string, select?: Prisma.UserSelect) {
+  getByEmail({ email, select }: { email: string; select?: Prisma.UserSelect }) {
     return db.user.findUnique({
       select: { id: true, ...select },
       where: { email },
