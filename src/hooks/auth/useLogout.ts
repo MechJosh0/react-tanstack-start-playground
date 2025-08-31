@@ -11,9 +11,8 @@ export function useLogout() {
   return useMutation({
     mutationFn: () => callUserLogout(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
-
       router.navigate({ to: '/' });
+      queryClient.clear();
     },
   });
 }

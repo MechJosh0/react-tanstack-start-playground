@@ -6,11 +6,13 @@ import { sessionService } from '@/services/session.service';
 export const userGet = createServerFn({ method: 'GET' }).handler(async () => {
   // TODO move this into a middleware
   const sessionToken = getCookie('session');
-  if (!sessionToken) return null;
+  if (!sessionToken) throw new Error('Invalid session');
+
   const session = await sessionService.extend(sessionToken);
-  if (!session) return null;
+  if (!session) throw new Error('Invalid session');
 
   const user = await userService.profile(session.userId);
 
+  console.log('return user', user);
   return user;
 });

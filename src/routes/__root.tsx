@@ -4,12 +4,8 @@ import { TanstackDevtools } from '@tanstack/react-devtools';
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools';
 import appCss from '../styles.css?url';
 import type { QueryClient } from '@tanstack/react-query';
-import { Route as IndexRoute } from '@/routes/index';
-import { Route as ProfileRoute } from '@/routes/profile/index';
-import { Route as AuthRegisterRoute } from '@/routes/auth/register';
-import { Route as AuthLoginRoute } from '@/routes/auth/login';
-import { useUsersProfile } from '@/hooks/user/useUsersProfile';
 import { useLogout } from '@/hooks/auth/useLogout';
+import { getAuthState } from '@/utils/auth';
 
 interface MyRouterContext {
   queryClient: QueryClient;
@@ -36,14 +32,18 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
     ],
   }),
-
   shellComponent: RootDocument,
+  beforeLoad: async () => {
+    const auth = await getAuthState();
+
+    return { auth };
+  },
   notFoundComponent: NotFoundPage,
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
-  const { user, isLoadingUser } = useUsersProfile();
   const logout = useLogout();
+  const { auth } = Route.useRouteContext();
 
   return (
     <html lang="en">
@@ -53,32 +53,34 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body className="bg-zinc-900 text-zinc-200 font-sans text-base">
         <header className="sticky top-0 z-50 h-16 bg-zinc-900 border-b border-zinc-800">
           <nav className="flex justify-end items-center h-full px-8 space-x-10">
-            {!isLoadingUser &&
-              (!user ? (
-                <>
-                  <Link className="hover:text-red-400 transition-colors" to={IndexRoute.fullPath}>
-                    Home
-                  </Link>
-                  <Link className="hover:text-red-400 transition-colors" to={AuthRegisterRoute.fullPath}>
-                    Register
-                  </Link>
-                  <Link className="hover:text-red-400 transition-colors" to={AuthLoginRoute.fullPath}>
-                    Login
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link className="hover:text-red-400 transition-colors" to={IndexRoute.fullPath}>
-                    Home
-                  </Link>
-                  <Link className="hover:text-red-400 transition-colors" to={ProfileRoute.fullPath}>
-                    Profile
-                  </Link>
-                  <button className="cursor-pointer hover:text-red-400 transition-colors" onClick={() => logout.mutate()} disabled={logout.isPending}>
-                    Logout
-                  </button>
-                </>
-              ))}
+            <Link className="hover:text-red-400 transition-colors" to="/profile">
+              Profile
+            </Link>
+            {!auth.isLoggedIn ? (
+              <>
+                <Link className="hover:text-red-400 transition-colors" to="/">
+                  Home
+                </Link>
+                <Link className="hover:text-red-400 transition-colors" to="/auth/register">
+                  Register
+                </Link>
+                <Link className="hover:text-red-400 transition-colors" to="/auth/login">
+                  Login
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link className="hover:text-red-400 transition-colors" to="/">
+                  Home
+                </Link>
+                <Link className="hover:text-red-400 transition-colors" to="/profile">
+                  Profile
+                </Link>
+                <button className="cursor-pointer hover:text-red-400 transition-colors" onClick={() => logout.mutate()} disabled={logout.isPending}>
+                  Logout
+                </button>
+              </>
+            )}
           </nav>
         </header>
 

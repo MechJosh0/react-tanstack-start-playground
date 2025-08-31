@@ -5,7 +5,7 @@ const config = {
   semi: true,
   singleQuote: true,
   trailingComma: 'all',
-  printWidth: 300,
+  printWidth: 200,
   // plugins: ['prettier-plugin-tailwindcss'],
   // tailwindStylesheet: './src/styles/tailwind.css',
 };

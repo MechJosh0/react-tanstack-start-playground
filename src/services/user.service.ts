@@ -23,7 +23,10 @@ export const userService = {
 
     const session = await sessionRepo.create({ userId: user.id, select: { token: true } });
 
-    setHeader('Set-Cookie', `session=${session.token}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${SESSION_DURATION / 1000}`);
+    setHeader('Set-Cookie', [
+      `session=${session.token};  HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${SESSION_DURATION / 1000}`,
+      `auth=true; Secure; SameSite=Strict; Path=/; Max-Age=${SESSION_DURATION / 1000}`,
+    ]);
 
     return true;
   },
@@ -39,7 +42,10 @@ export const userService = {
 
     const session = await sessionRepo.create({ userId: user.id, select: { token: true } });
 
-    setHeader('Set-Cookie', `session=${session.token}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${SESSION_DURATION / 1000}`);
+    setHeader('Set-Cookie', [
+      `session=${session.token}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${SESSION_DURATION / 1000}`,
+      `auth=true; Secure; SameSite=Strict; Path=/; Max-Age=${SESSION_DURATION / 1000}`,
+    ]);
 
     return true;
   },
@@ -50,7 +56,7 @@ export const userService = {
 
     await sessionRepo.delete(sessionToken);
 
-    setHeader('Set-Cookie', `session=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0`);
+    setHeader('Set-Cookie', [`session=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0`, `auth=; Secure; SameSite=Strict; Path=/; Max-Age=0`]);
 
     return true;
   },

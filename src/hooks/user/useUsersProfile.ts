@@ -12,6 +12,5 @@ export function useUsersProfile() {
   return {
     user,
     isLoadingUser,
-    isAuthenticated: !!user,
   };
 }

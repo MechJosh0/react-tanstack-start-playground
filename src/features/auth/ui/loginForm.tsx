@@ -2,7 +2,7 @@ import { useServerFn } from '@tanstack/react-start';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from '@tanstack/react-form';
 import { useState } from 'react';
-import { useRouter } from '@tanstack/react-router';
+import { useLocation, useRouteContext, useRouter, useSearch } from '@tanstack/react-router';
 import { userCreateSchema } from '../schema/userCreateSchema';
 import { userLogin } from '../api/userLogin.server';
 import { Input } from '@/components/tanstack/form/input';
@@ -21,16 +21,17 @@ export const defaultUser: LoginForm = {
 export default function LoginForm() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const location = useLocation();
   const [formError, setFormError] = useState<string | undefined>(undefined);
-
   const callUserLogin = useServerFn(userLogin);
 
   const { mutate: createUser } = useMutation({
     mutationFn: async (data: LoginForm) => callUserLogin({ data }),
     onSuccess: function () {
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      const redirect = (location.search as any)?.redirect || '/';
 
-      router.navigate({ to: '/' });
+      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      router.navigate({ to: redirect });
     },
     onError: function (error: unknown) {
       if (error instanceof Error) {
