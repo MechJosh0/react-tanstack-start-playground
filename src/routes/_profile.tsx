@@ -1,6 +1,5 @@
 import { Outlet, createFileRoute } from '@tanstack/react-router';
 import { requireAuth } from '@/utils/auth';
-import { useUsersProfile } from '@/hooks/user/useUsersProfile';
 
 export const Route = createFileRoute('/_profile')({
   component: RouteComponent,
